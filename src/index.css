@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --font-sans: Inter, sans-serif;
+  --font-display: Playfair Display, serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-sans text-gray-800 bg-gray-50;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-primary-600 text-white font-medium rounded-xl
+           hover:bg-primary-700 transition-all duration-300
+           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-white text-primary-600 font-medium rounded-xl
+           border-2 border-primary-600 hover:bg-primary-50
+           transition-all duration-300
+           shadow-md hover:shadow-lg;
+  }
+  
+  .btn-accent {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-accent-500 text-white font-medium rounded-xl
+           hover:bg-accent-600 transition-all duration-300
+           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-20 lg:py-24;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl 
+           transition-all duration-300 border border-gray-100;
+  }
+  
+  .card-hover {
+    @apply hover:-translate-y-2;
+  }
+  
+  .heading-1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-display font-bold;
+  }
+  
+  .heading-2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-display font-bold;
+  }
+  
+  .heading-3 {
+    @apply text-2xl md:text-3xl font-display font-semibold;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-primary-400;
+  }
+  
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-lg;
+  }
+  
+  .emergency-banner {
+    @apply bg-linear-to-r from-red-600 to-red-500 text-white py-3 px-4;
+  }
+}
+
+@layer utilities {
+  .bg-linear-to-br {
+    background: linear-gradient(to bottom right, var(--tw-gradient-stops));
+  }
+  
+  .bg-linear-to-r {
+    background: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .hospital-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5e7eb' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
