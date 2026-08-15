@@ -64,3 +64,23 @@ JWT_SECRET=your_jwt_secret
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=secret
 ```
+
+Deploying API on Vercel (serverless)
+
+- Add a serverless wrapper under `api/` so Vercel deploys your Express app as functions. Two samples are included:
+  - `api/index.js` — CommonJS wrapper
+  - `api/index.mjs` — ESM wrapper
+
+- Steps:
+  1. Ensure your Express `app` is exported from a file near the repo root (e.g., `server.js`, `app.js`, or `index.js`).
+  2. If necessary, edit `api/index.js` or `api/index.mjs` to point to your server file path.
+  3. Install `serverless-http` in your project:
+
+```bash
+npm install serverless-http
+```
+
+  4. Add required environment variables in the Vercel dashboard.
+  5. Deploy — your API will be available under `/api/*` on Vercel.
+
+If you'd like, I can create the exact wrapper pointing to a specific server file if you tell me its path in this repo.
