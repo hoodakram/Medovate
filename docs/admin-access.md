@@ -84,3 +84,17 @@ npm install serverless-http
   5. Deploy — your API will be available under `/api/*` on Vercel.
 
 If you'd like, I can create the exact wrapper pointing to a specific server file if you tell me its path in this repo.
+\
+
+Frontend API configuration
+
+- Use relative API calls in the frontend (recommended) so requests go to the same origin: e.g. `/api/auth/login`.
+- If you prefer an explicit base URL, set `VITE_API_URL` in Vercel to your site API, for example:
+
+```
+VITE_API_URL=/api
+# or
+VITE_API_URL=https://medovate-five.vercel.app/api
+```
+
+Ensure your frontend reads `import.meta.env.VITE_API_URL` and falls back to `/api` when unset.
