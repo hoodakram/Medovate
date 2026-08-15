@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "Admin API",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "description": "Collection for admin dashboard/API access",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "admin_username", "value": "admin" },
+    { "key": "admin_password", "value": "secret" },
+    { "key": "jwt", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"{{admin_username}}\", \"password\": \"{{admin_password}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","auth","login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Admin Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/dashboard",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","admin","dashboard"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
