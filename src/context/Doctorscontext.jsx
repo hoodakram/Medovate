@@ -118,63 +118,87 @@ const defaultDoctors = [
 
 const DoctorsContext = createContext(undefined);
 
+// Backends disagree on envelope shape; accept the common ones rather than
+// silently pushing `undefined` into the list.
+const pickList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.doctors)) return data.doctors;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.data?.doctors)) return data.data.doctors;
+  return null;
+};
+
+const pickOne = (data) => {
+  if (data?.doctor) return data.doctor;
+  if (data?.data?.doctor) return data.data.doctor;
+  if (data?.data?._id) return data.data;
+  if (data?._id) return data;
+  return null;
+};
+
 export function DoctorsProvider({ children }) {
   const [doctors, setDoctors] = useState(defaultDoctors);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Fetch doctors from backend on load
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
+  // True while the list on screen is the hardcoded demo data rather than the
+  // database. The admin panel must not offer to edit rows that don't exist.
+  const [usingFallback, setUsingFallback] = useState(true);
 
   const fetchDoctors = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await api.doctors.getAll();
-      // If backend returns doctors use them, otherwise keep defaults
-      if (data.doctors && data.doctors.length > 0) {
-        setDoctors(data.doctors);
-      }
+      const list = pickList(data);
+      if (!list) throw new Error('Unexpected response shape from GET /doctors');
+      setDoctors(list);
+      setUsingFallback(false);
+      return list;
     } catch (err) {
-      // Backend not available — fall back to default doctors
+      // Backend not available — fall back to default doctors for public pages
       console.warn('Backend unavailable, using default doctors:', err.message);
+      setError(err.message);
       setDoctors(defaultDoctors);
+      setUsingFallback(true);
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch doctors from backend on load
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
   const addDoctor = async (doctorData, imageFile = null) => {
-    try {
-      const data = await api.doctors.create(doctorData, imageFile);
-      setDoctors(prev => [data.doctor, ...prev]);
-    } catch (err) {
-      throw new Error(err.message || 'Failed to add doctor');
+    const data = await api.doctors.create(doctorData, imageFile);
+    const created = pickOne(data);
+    if (created) {
+      setDoctors(prev => [created, ...prev]);
+    } else {
+      // Response shape not recognised — re-read rather than guess.
+      await fetchDoctors();
     }
   };
 
   const updateDoctor = async (id, doctorData, imageFile = null) => {
-    try {
-      const data = await api.doctors.update(id, doctorData, imageFile);
-      setDoctors(prev => prev.map(d => (d._id === id ? data.doctor : d)));
-    } catch (err) {
-      throw new Error(err.message || 'Failed to update doctor');
+    const data = await api.doctors.update(id, doctorData, imageFile);
+    const updated = pickOne(data);
+    if (updated) {
+      setDoctors(prev => prev.map(d => (d._id === id ? updated : d)));
+    } else {
+      await fetchDoctors();
     }
   };
 
   const deleteDoctor = async (id) => {
-    try {
-      await api.doctors.delete(id);
-      setDoctors(prev => prev.filter(d => d._id !== id));
-    } catch (err) {
-      throw new Error(err.message || 'Failed to delete doctor');
-    }
+    await api.doctors.delete(id);
+    setDoctors(prev => prev.filter(d => d._id !== id));
   };
 
   return (
-    <DoctorsContext.Provider value={{ doctors, loading, error, addDoctor, updateDoctor, deleteDoctor, fetchDoctors }}>
+    <DoctorsContext.Provider value={{ doctors, loading, error, usingFallback, addDoctor, updateDoctor, deleteDoctor, fetchDoctors }}>
       {children}
     </DoctorsContext.Provider>
   );

@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import AdminLogin from '../components/AdminLogin';
 
 export default function AdminPanel() {
-  const { doctors, addDoctor, updateDoctor, deleteDoctor, loading } = useDoctors();
-  const { isAuthenticated, logout } = useAuth();
+  const { doctors, addDoctor, updateDoctor, deleteDoctor, loading, error, usingFallback, fetchDoctors } = useDoctors();
+  const { isAuthenticated, logout, loading: authLoading } = useAuth();
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -27,6 +27,18 @@ export default function AdminPanel() {
     about: '',
     schedule: '',
   });
+
+  // Verifying the stored token — don't flash the login form on every refresh.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <svg className="animate-spin h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+      </div>
+    );
+  }
 
   // If not authenticated, show login
   if (!isAuthenticated) {
@@ -122,7 +134,7 @@ export default function AdminPanel() {
   // Statistics
   const totalDoctors = doctors.length;
   const averageRating = totalDoctors > 0
-    ? (doctors.reduce((sum, doc) => sum + doc.rating, 0) / totalDoctors).toFixed(1)
+    ? (doctors.reduce((sum, doc) => sum + (Number(doc.rating) || 0), 0) / totalDoctors).toFixed(1)
     : 0;
   const departmentsCount = new Set(doctors.map(doc => doc.department)).size;
   const totalPatients = doctors.reduce((sum, doc) => {
@@ -152,6 +164,23 @@ export default function AdminPanel() {
       </div>
 
       <div className="container-custom py-8">
+
+        {/* Backend unreachable — the list below is demo data, not the database */}
+        {!loading && usingFallback && (
+          <div className="mb-8 bg-amber-50 border border-amber-300 text-amber-900 rounded-xl p-5">
+            <p className="font-semibold mb-1">Backend unavailable — showing demo data</p>
+            <p className="text-sm">
+              The doctors below are placeholders, not records from the database, so adding,
+              editing and deleting are disabled. {error && <span className="font-mono">({error})</span>}
+            </p>
+            <button
+              onClick={fetchDoctors}
+              className="mt-3 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              Retry connection
+            </button>
+          </div>
+        )}
 
         {/* Statistics Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -212,7 +241,9 @@ export default function AdminPanel() {
               {!isAdding && (
                 <button
                   onClick={() => setIsAdding(true)}
-                  className="bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
+                  disabled={usingFallback}
+                  title={usingFallback ? 'Unavailable while the backend is unreachable' : undefined}
+                  className="bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-600"
                 >
                   <FaPlus className="w-5 h-5" />
                   Add New Doctor
@@ -495,15 +526,17 @@ export default function AdminPanel() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEdit(doctor)}
-                            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
-                            title="Edit"
+                            disabled={usingFallback}
+                            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+                            title={usingFallback ? 'Unavailable while the backend is unreachable' : 'Edit'}
                           >
                             <FaEdit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(doctor)}
-                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
-                            title="Delete"
+                            disabled={usingFallback}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
+                            title={usingFallback ? 'Unavailable while the backend is unreachable' : 'Delete'}
                           >
                             <FaTrash className="w-4 h-4" />
                           </button>
